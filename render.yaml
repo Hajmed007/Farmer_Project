@@ -1,0 +1,51 @@
+services:
+  # MySQL Database
+  - type: database
+    name: farmer-db
+    databaseName: farmer_market
+    user: root
+    plan: free # Note: Render Free Database expires after 90 days
+
+  # Backend Service (Spring Boot)
+  - type: web
+    name: backend
+    env: docker
+    dockerContext: ./backend
+    dockerfile: ./backend/Dockerfile
+    plan: starter
+    healthCheckPath: /api/auth/login
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+      - key: DB_HOST
+        fromDatabase:
+          name: farmer-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: farmer-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: farmer-db
+          property: databaseName
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: farmer-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: farmer-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        value: "https://farmer-market-frontend.onrender.com" # Update this to your actual frontend URL after deployment
+
+  # Frontend Service (React + Nginx)
+  - type: web
+    name: frontend
+    env: docker
+    dockerContext: ./frontend
+    dockerfile: ./frontend/Dockerfile
+    plan: starter
