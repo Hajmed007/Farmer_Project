@@ -53,14 +53,21 @@ public class SecurityConfig {
         
         String allowedOrigins = System.getenv("ALLOWED_ORIGINS");
         if (allowedOrigins != null && !allowedOrigins.isEmpty()) {
-            configuration.setAllowedOrigins(java.util.Arrays.asList(allowedOrigins.split(",")));
+            if (allowedOrigins.equals("*")) {
+                configuration.setAllowedOrigins(java.util.List.of("*"));
+                configuration.setAllowCredentials(false); // Credentials not allowed with "*"
+            } else {
+                configuration.setAllowedOrigins(java.util.Arrays.asList(allowedOrigins.split(",")));
+                configuration.setAllowCredentials(true);
+            }
         } else {
-            configuration.setAllowedOriginPatterns(java.util.List.of("http://localhost:*", "http://127.0.0.1:*"));
+            configuration.setAllowedOriginPatterns(java.util.List.of(
+                "http://localhost:*", 
+                "http://127.0.0.1:*",
+                "https://*.vercel.app"
+            ));
+            configuration.setAllowCredentials(true);
         }
-        
-        configuration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(java.util.List.of("*"));
-        configuration.setAllowCredentials(true);
         
         source.registerCorsConfiguration("/**", configuration);
         return source;
