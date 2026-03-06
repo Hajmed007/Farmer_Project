@@ -1,55 +1,25 @@
 services:
-  # MySQL Database
-  - type: database
-    name: farmer-db
-    databaseName: farmer_market
-    user: root
-    plan: free # Note: Render Free Database expires after 90 days
-
   # Backend Service (Spring Boot)
   - type: web
-    name: backend
+    name: farmer-market-backend
     env: docker
     dockerContext: ./backend
     dockerfile: ./backend/Dockerfile
-    plan: starter
+    plan: free
     healthCheckPath: /api/products
     envVars:
       - key: PORT
         value: 8080
       - key: SPRING_DATASOURCE_URL
-        value: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
-      - key: DB_HOST
-        fromDatabase:
-          name: farmer-db
-          property: host
-      - key: DB_PORT
-        fromDatabase:
-          name: farmer-db
-          property: port
-      - key: DB_NAME
-        fromDatabase:
-          name: farmer-db
-          property: databaseName
-      - key: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
-        value: org.hibernate.dialect.PostgreSQLDialect
+        sync: false
       - key: SPRING_DATASOURCE_USERNAME
-        fromDatabase:
-          name: farmer-db
-          property: user
+        sync: false
       - key: SPRING_DATASOURCE_PASSWORD
-        fromDatabase:
-          name: farmer-db
-          property: password
+        sync: false
+      - key: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+        value: org.hibernate.dialect.MySQL8Dialect
       - key: JWT_SECRET
         generateValue: true
       - key: ALLOWED_ORIGINS
-        value: "https://farmer-market-frontend.onrender.com" # Update this to your actual frontend URL after deployment
+        value: "https://farmer-market-frontend.vercel.app" # Update this to your actual Vercel URL
 
-  # Frontend Service (React + Nginx)
-  - type: web
-    name: frontend
-    env: docker
-    dockerContext: ./frontend
-    dockerfile: ./frontend/Dockerfile
-    plan: starter
