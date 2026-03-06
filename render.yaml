@@ -13,10 +13,12 @@ services:
     dockerContext: ./backend
     dockerfile: ./backend/Dockerfile
     plan: starter
-    healthCheckPath: /api/auth/login
+    healthCheckPath: /api/products
     envVars:
+      - key: PORT
+        value: 8080
       - key: SPRING_DATASOURCE_URL
-        value: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+        value: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
       - key: DB_HOST
         fromDatabase:
           name: farmer-db
@@ -29,6 +31,8 @@ services:
         fromDatabase:
           name: farmer-db
           property: databaseName
+      - key: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+        value: org.hibernate.dialect.PostgreSQLDialect
       - key: SPRING_DATASOURCE_USERNAME
         fromDatabase:
           name: farmer-db
